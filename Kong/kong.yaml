@@ -1,0 +1,28 @@
+_format_version: "3.0"
+
+services:
+  - name: solicitud-service-backend
+    url: http://solicitud_service_app:5001
+    protocol: http
+    routes:
+      - name: solicitudes-catchall-route
+        # IMPORTANTE: paths DEBE terminar con '/' para actuar como prefijo correctamente
+        # para que /api/v1/solicitudes y /api/v1/health sean capturados.
+        paths:
+          - /api/v1/ 
+        # strip_path: true quitará /api/v1/ antes de enviar al backend.
+        # Ej: /api/v1/solicitudes -> /solicitudes
+        # Ej: /api/v1/health -> /health
+        strip_path: true 
+        # No especificamos methods para que acepte GET, POST, etc.
+        plugins:
+          - name: key-auth
+            config:
+              key_names:
+                - apikey
+              hide_credentials: true
+          - name: rate-limiting
+            config:
+              minute: 5 # Límite por minuto
+              policy: local
+              limit_by: consumer
